@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Larder</title>
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Larder">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: practical, encouraging kitchen companion for steady weight loss
+   IDEA: the printed Nutrition Facts panel: heavy black rules, condensed black type
+   PICTURE: today's live label: calories left, macro bars
+   COLOUR and TYPE: white label + black ink, tomato accent, leaf green for fresh food; Archivo condensed / Archivo
+   LAYOUT: one-column phone app, bottom tab bar, sheets slide up */
+:root{color-scheme:light dark;--bg:light-dark(#fff,#121211);--ink:light-dark(#111,#f1efe9);--mute:light-dark(#5f5d58,#a8a49b);--soft:light-dark(#f2f0eb,#1f1e1c);--line:light-dark(#d9d6cf,#363430);--acc:light-dark(#d23b1d,#ff6c4c);--leaf:light-dark(#2d7a3c,#66c578);--warn:light-dark(#9a6200,#f0b23c);--ice:light-dark(#2463b5,#82b3f2)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system-ui,sans-serif;overflow-x:clip;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:calc(14px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left));max-width:720px;margin:0 auto}
+.brand{font-weight:900;font-stretch:68%;font-size:30px;line-height:1}
+.sync{font-size:13px;color:var(--mute);text-align:right}
+main{max-width:720px;margin:0 auto;padding:0 16px}
+h2{font-weight:900;font-stretch:70%;font-size:34px;line-height:1.05;margin:22px 0 10px;text-wrap:balance}
+h3{font-weight:900;font-stretch:78%;font-size:21px;line-height:1.1;margin:0}
+h4{font-size:14px;margin:12px 0 4px}
+p{margin:6px 0}
+.meta,.none{font-size:13px;color:var(--mute)}
+.none{margin:8px 0}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip-path:inset(50%)}
+button,.btn{font:inherit;font-weight:700;font-size:16px;min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid var(--ink);background:var(--bg);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;position:relative;text-decoration:none;white-space:nowrap}
+button:disabled{opacity:.45;cursor:default}
+.pri{background:var(--ink);color:var(--bg)}
+.acc{background:var(--acc);border-color:var(--acc);color:#fff}
+.sm{min-height:40px;padding:0 12px;font-size:14px}
+.ghost{border-color:transparent;background:none}
+.wide{width:100%;margin-top:14px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+label:focus-within{outline:none}
+.btn:has(input:focus-visible){outline:3px solid var(--acc);outline-offset:2px}
+input,select,textarea{font:inherit;font-size:16px;min-height:44px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+textarea{resize:vertical}
+.f{display:block;font-size:13px;font-weight:700;color:var(--mute)}
+.f>span{display:block;margin-bottom:4px}
+.chk{display:flex;gap:10px;align-items:center;min-height:44px;font-size:15px}
+.chk input{width:22px;height:22px;min-height:0;flex:none;accent-color:var(--ink)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.span2{grid-column:1/-1}
+.g5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>input{flex:1 1 160px;width:auto}
+.panel{border:1.5px solid var(--line);border-radius:14px;padding:14px}
+/* the label */
+.label{border:2px solid var(--ink);padding:8px 12px 12px}
+.label h1{font-weight:900;font-stretch:62%;font-size:clamp(38px,11vw,52px);line-height:1;margin:0}
+.daynav{display:flex;align-items:center;gap:4px;margin:2px 0 6px}
+.ic{min-height:40px;width:40px;padding:0;border:0;background:none;font-size:24px}
+.daytxt{font-weight:700;font-size:15px}
+.r10{border-top:10px solid var(--ink)}.r5{border-top:5px solid var(--ink);margin-top:10px}
+.calrow{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:8px 0 2px}
+.calrow .k{font-weight:900;font-stretch:80%;font-size:24px;line-height:1.1}
+.big{font-weight:900;font-stretch:66%;font-size:clamp(58px,17vw,84px);line-height:.85;font-variant-numeric:tabular-nums}
+.over{color:var(--acc)}
+.bar{height:8px;background:var(--soft);position:relative;overflow:hidden;margin:6px 0 0;border-radius:1px}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--ink)}
+.bar i.ov{background:var(--acc)}
+.mrow{padding:8px 0 6px;border-top:1px solid var(--ink)}
+.mrow:first-of-type{border-top:0}
+.mrow .t{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.mrow .g{color:var(--mute);white-space:nowrap;font-size:14px}
+.cta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 4px}
+.meal{margin-top:20px}
+.mh{display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--ink);padding-bottom:2px}
+.mh h3{flex:1}
+.entry{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.entry .n{flex:1;font-weight:600}
+.entry small{display:block;color:var(--mute);font-size:13px;font-weight:400}
+.kc{font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+.x{width:44px;min-height:44px;padding:0;border:0;background:none;color:var(--mute);font-size:22px;flex:none}
+/* kitchen */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 6px;scrollbar-width:none}
+.chip{border-radius:999px;flex:none;min-height:40px;font-size:14px}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.cnt{font-weight:400;opacity:.7}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.nm{font-weight:800;font-size:17px}
+.loc{display:inline-block;font-size:12px;font-weight:700;padding:0 8px;border-radius:999px;border:1.5px solid currentColor;vertical-align:2px;margin-left:4px}
+.loc.Pantry{color:var(--warn)}.loc.Fridge{color:var(--leaf)}.loc.Freezer{color:var(--ice)}
+.tag{font-size:11px;font-weight:700;color:var(--mute);border:1px dashed var(--mute);border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:2px}
+.exp{font-size:13px;font-weight:700;white-space:nowrap;text-align:right}
+.exp.soon{color:var(--acc)}
+.acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:10px}
+.stepper button{border:0;min-height:40px;width:40px;padding:0;background:none;font-size:20px}
+.stepper span{min-width:3.2ch;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.empty{padding:26px 18px;text-align:center;border:2px dashed var(--line);border-radius:14px;color:var(--mute);margin-top:12px}
+.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:4px}
+.empty .row{justify-content:center;margin-top:12px}
+/* meals */
+.idea{border:2px solid var(--ink);border-radius:14px;padding:14px 16px;margin:14px 0}
+.ih{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.macros{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:14px;margin:8px 0 0}
+.macros b{font-size:18px;font-variant-numeric:tabular-nums}
+.idea ul,.idea ol{margin:4px 0;padding-left:20px;font-size:15px}
+details summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.skel{height:150px;border-radius:14px;margin:14px 0;background:linear-gradient(90deg,var(--soft) 20%,var(--line) 50%,var(--soft) 80%);background-size:250% 100%;animation:sh 1.3s linear infinite}
+@keyframes sh{to{background-position:-150% 0}}
+.status{font-size:14px;padding:10px 12px;background:var(--soft);border-radius:10px;margin:12px 0 0}
+.status.err{color:var(--acc)}
+/* progress */
+.wk{display:grid;grid-template-columns:3.2em minmax(0,1fr) 5.5em;gap:10px;align-items:center;font-size:14px;padding:5px 0}
+.wk .bar{margin:0;height:14px}
+.wk .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fig{position:relative;min-height:200px;margin:12px 0 4px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.wl{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);font-size:15px}
+.presets{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;font-size:14px}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0;flex:1}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.seg.full{display:flex;margin-top:16px}
+/* nav */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:2px solid var(--ink);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);z-index:20}
+.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 10px;font-size:13px;font-weight:700;color:var(--mute);text-decoration:none;min-height:58px}
+.tabs a[aria-current=page]{color:var(--ink)}
+.tabs svg{width:24px;height:24px}
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0/.5);z-index:40;display:none;align-items:flex-end;justify-content:center}
+.scrim.open{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:94vh;overflow:auto;border-radius:18px 18px 0 0;padding:6px 16px calc(22px + env(safe-area-inset-bottom));border-top:2px solid var(--ink);animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.3}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}.skel{animation:none}}
+.shh{display:flex;align-items:center;justify-content:space-between}
+.shh h2{margin:10px 0}
+.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tool{flex-direction:column;min-height:76px;font-size:14px;line-height:1.15;white-space:normal;text-align:center;padding:8px}
+.tool svg{width:26px;height:26px}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);border-radius:12px;padding:6px 6px 6px 16px;display:flex;gap:12px;align-items:center;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:calc(100vw - 32px);font-size:15px}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast .btn{background:var(--bg);color:var(--ink);border-color:var(--bg)}
+.toast span{padding:8px 0}
+@media (max-width:440px){.g5{grid-template-columns:repeat(3,minmax(0,1fr))}.h-hide{display:none}}
+</style>
+<style>
+.scanner{position:fixed;inset:0;z-index:80;background:#000;display:flex;align-items:center;justify-content:center;color:#fff}
+.scanner[hidden]{display:none}
+.scanner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reticle{position:relative;width:min(82vw,360px);aspect-ratio:1.7;border:3px solid #fff;border-radius:16px;box-shadow:0 0 0 100vmax rgb(0 0 0/.45)}
+.reticle::after{content:'';position:absolute;left:8%;right:8%;top:50%;height:2px;background:#ff6c4c;animation:sweep 1.4s ease-in-out infinite alternate}
+@keyframes sweep{from{transform:translateY(-34px)}to{transform:translateY(34px)}}
+@media (prefers-reduced-motion:reduce){.reticle::after{animation:none}}
+.scanbar{position:absolute;left:0;right:0;bottom:0;padding:16px 16px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;align-items:center}
+.scanbar p{margin:0;font-weight:700;text-shadow:0 1px 6px #000;text-align:center}
+.scanner .btn{background:#fff;color:#111;border-color:#fff}
+.scanner .btn.ghost{background:rgb(0 0 0/.35);color:#fff;border-color:#fff}
+.reply{margin-top:12px}
+.ai-src{display:grid;gap:8px;margin-top:10px}
+</style>
+</head><body>
+<header class="top"><div class="brand">Larder</div><div class="sync" id="sync"></div></header>
+<main id="view" aria-live="polite"></main>
+
+<nav class="tabs" aria-label="Sections">
+ <a href="#today" data-t="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M4 8h16M8 12h8M8 16h5"/></svg>Today</a>
+ <a href="#kitchen" data-t="kitchen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M5 9h14M9 5v2M9 12v4"/></svg>Kitchen</a>
+ <a href="#meals" data-t="meals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11h18a9 9 0 0 1-18 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg>Meals</a>
+ <a href="#progress" data-t="progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18M4 16l5-5 4 3 7-8"/></svg>Progress</a>
+</nav>
+
+<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t">
+ <div class="shh"><h2 id="sh-t">Add food</h2><button class="x" data-a="close" aria-label="Close">×</button></div>
+ <div class="tools">
+  <button class="btn tool" data-a="scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v14M6 5v14M10 5v14M12 5v14M15 5v14M19 5v14M21 5v14"/></svg>Scan barcode</button>
+  <label class="btn tool" id="labelbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20"/><path d="M5 7h14M8 11h8M8 14h8M8 17h5"/></svg>Photo of label<input type="file" accept="image/*" capture="environment" class="vh" id="in-label"></label>
+  <button class="btn tool" data-a="describe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>Describe it</button>
+ </div>
+ <div id="descbox" hidden style="margin-top:10px"><label class="f"><span>What is it, and how much?</span><textarea id="f-desc" rows="2" placeholder="2 scrambled eggs with a slice of buttered whole-wheat toast"></textarea></label><button class="btn pri wide" data-a="estimate" style="margin-top:8px">Estimate nutrition</button><p class="meta" id="desc-hint"></p></div>
+ <div class="status" id="f-status" hidden></div>
+ <div id="pickwrap" style="margin-top:12px"><label class="f"><span>Or pick from your kitchen</span><select id="f-pick"></select></label>
+  <label class="chk" id="takewrap" hidden><input type="checkbox" id="f-take" checked> Take it out of my kitchen</label></div>
+ <div class="grid2">
+  <label class="f span2"><span>Name</span><input id="f-name" autocomplete="off"></label>
+  <label class="f"><span>Brand</span><input id="f-brand" autocomplete="off"></label>
+  <label class="f"><span>Barcode</span><input id="f-code" inputmode="numeric" autocomplete="off"></label>
+  <label class="f span2"><span>Serving size</span><input id="f-serv" placeholder="e.g. 3/4 cup (175 g)"></label>
+ </div>
+ <div class="g5">
+  <label class="f"><span>Calories</span><input id="f-kcal" type="number" inputmode="decimal" min="0"></label>
+  <label class="f"><span>Protein g</span><input id="f-p" type="number" inputmode="decimal" min="0" step="0.1"></label>
+  <label class="f"><span>Carbs g</span><input id="f-c" type="number" inputmode="decimal" min="0" step="0.1"></label>
+  <label class="f"><span>Fat g</span><input id="f-f" type="number" inputmode="decimal" min="0" step="0.1"></label>
+  <label class="f"><span>Fibre g</span><input id="f-fib" type="number" inputmode="decimal" min="0" step="0.1"></label>
+ </div>
+ <p class="meta">Per one serving.</p>
+ <div class="seg full" role="group" aria-label="Where it goes"><button data-a="dest" data-d="log">Log it</button><button data-a="dest" data-d="kit">Add to kitchen</button></div>
+ <div id="d-log" class="grid2">
+  <label class="f"><span>Meal</span><select id="f-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option></select></label>
+  <label class="f"><span>Servings eaten</span><input id="f-sv" type="number" inputmode="decimal" min="0" step="0.25" value="1"></label>
+ </div>
+ <div id="d-kit" class="grid2">
+  <label class="f"><span>Kept in</span><select id="f-loc"><option>Pantry</option><option>Fridge</option><option>Freezer</option></select></label>
+  <label class="f"><span>Servings on hand</span><input id="f-qty" type="number" inputmode="decimal" min="0" step="0.5" value="1"></label>
+  <label class="f span2"><span>Best before (optional)</span><input id="f-exp" type="date"></label>
+ </div>
+ <button class="btn pri wide" data-a="savefood" id="f-save">Save</button>
+</div></div>
+
+<div class="scanner" id="scanner" hidden>
+ <video id="scan-v" playsinline muted></video>
+ <div class="reticle" aria-hidden="true"></div>
+ <div class="scanbar"><p id="scan-msg">Line up the barcode inside the box</p>
+  <div class="row"><button class="btn" data-a="stopscan">Cancel</button><label class="btn ghost">Use a photo<input type="file" accept="image/*" class="vh" id="in-scanphoto"></label></div></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="zxing.min.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=parseFloat(v);return Number.isFinite(n)?n:0};
+const fmt=n=>Math.round(num(n)).toLocaleString();
+const g1=n=>{const r=Math.round(num(n)*10)/10;return r%1?r.toFixed(1):String(r)};
+const nid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const dkey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parseD=k=>{const [y,m,d]=String(k).split('-').map(Number);return new Date(y,(m||1)-1,d||1)};
+const addD=(k,n)=>{const d=parseD(k);d.setDate(d.getDate()+n);return dkey(d)};
+const TODAY=()=>dkey(new Date());
+const MEALS=['Breakfast','Lunch','Dinner','Snacks'],LOCS=['Pantry','Fridge','Freezer'];
+const mealNow=()=>{const n=new Date(),h=n.getHours()+n.getMinutes()/60;return h<10.5?'Breakfast':h<15?'Lunch':h<20.5?'Dinner':'Snacks'};
+const daysTo=k=>k?Math.round((parseD(k)-parseD(TODAY()))/864e5):null;
+const LB=2.20462;
+const STANDALONE=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+
+const S={inv:[],foods:{},goals:{kcal:1800,p:130,c:180,f:60,fib:28,unit:'kg'},set:{gemKey:'',gemModel:'gemini-2.5-flash'},weights:[],logs:{},day:TODAY(),tab:'today',loc:'All',q:'',ideas:null,ideaErr:'',busy:false,mopt:{meal:mealNow(),n:'1',fit:true,exp:true,strict:false,note:''}};
+
+/* ---------- storage: this phone ---------- */
+const K='larder:';
+const load=(k,def)=>{try{const v=localStorage.getItem(K+k);if(v)return JSON.parse(v)}catch(e){}return def};
+const save=(k,v)=>{try{localStorage.setItem(K+k,JSON.stringify(v))}catch(e){toast('Phone storage is full. Delete some old items or make a backup.')}};
+const saveInv=()=>save('inv',{items:S.inv});
+const saveDay=k=>save('log-'+k,{entries:S.logs[k]||[]});
+const saveGoals=()=>save('goals',S.goals);
+const saveW=()=>save('weights',{list:S.weights});
+const saveSet=()=>save('settings',S.set);
+function day(k){if(!S.logs[k]){const d=load('log-'+k,{entries:[]});S.logs[k]=Array.isArray(d.entries)?d.entries:[]}return S.logs[k]}
+
+/* ---------- AI: Claude app hand-off, or Gemini free tier ---------- */
+const hasGem=()=>!!S.set.gemKey;
+function b64(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(blob)})}
+async function gemini(prompt,img){
+ if(!hasGem())throw{code:'nokey'};
+ const parts=[{text:prompt+'\n\nRespond with only the JSON object.'}];
+ if(img)parts.push({inline_data:{mime_type:'image/jpeg',data:await b64(img)}});
+ let r;
+ try{r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(S.set.gemModel||'gemini-2.5-flash')}:generateContent?key=${encodeURIComponent(S.set.gemKey)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}],generationConfig:{responseMimeType:'application/json',temperature:.7}})})}catch(e){throw{code:'offline'}}
+ if(r.status===429)throw{code:'rate_limited'};
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw{code:'api',message:(j.error&&j.error.message)||('HTTP '+r.status)};
+ const t=((j.candidates||[])[0]?.content?.parts||[]).map(p=>p.text||'').join('');
+ return parseJSON(t);
+}
+function parseJSON(t){t=String(t||'');const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<a)throw{code:'parse'};return JSON.parse(t.slice(a,b+1))}
+const errMsg=e=>e&&e.code==='nokey'?'Add a free Gemini key in Progress → Meal ideas helper to use this.':e&&e.code==='rate_limited'?'Gemini’s free limit is used up for now. Try again later, or use the Claude app.':e&&e.code==='offline'?'You’re offline. Try again when you have a connection.':e&&e.code==='api'?'Gemini said: '+e.message:'That didn’t work. Try again, or fill the numbers in by hand.';
+function openClaude(prompt){
+ let ok=true;
+ try{navigator.clipboard.writeText(prompt).catch(()=>{ok=false})}catch(e){ok=false}
+ const url='https://claude.ai/new?q='+encodeURIComponent(prompt.slice(0,12000));
+ const w=window.open(url,'_blank');if(!w)location.href=url;
+ toast(ok?'Prompt copied. If Claude opens with an empty box, paste it in.':'Claude is opening with your prompt');
+}
+
+/* ---------- images & barcodes ---------- */
+function scaled(file,max){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res({blob:b,url:URL.createObjectURL(b)}):rej(),'image/jpeg',.88)};im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
+function hints(hard){const Z=window.ZXing,h=new Map();if(hard)h.set(Z.DecodeHintType.TRY_HARDER,true);h.set(Z.DecodeHintType.POSSIBLE_FORMATS,[Z.BarcodeFormat.EAN_13,Z.BarcodeFormat.EAN_8,Z.BarcodeFormat.UPC_A,Z.BarcodeFormat.UPC_E,Z.BarcodeFormat.CODE_128]);return h}
+async function decodePhoto(file){
+ if(!window.ZXing)return null;
+ for(const size of [1400,900,2000]){let img;try{img=await scaled(file,size);const r=await new ZXing.BrowserMultiFormatReader(hints(true)).decodeFromImageUrl(img.url);if(r)return r.getText()}catch(e){}finally{if(img)URL.revokeObjectURL(img.url)}}
+ return null;
+}
+let reader=null,scanDone=false;
+async function startScan(){
+ if(!window.ZXing){st('The scanner didn’t load. Close and reopen the app.',true);return}
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){st('This browser can’t use the camera. Open Larder from your Home Screen, or type the barcode number.',true);return}
+ scanDone=false;$('#scanner').hidden=false;$('#scan-msg').textContent='Line up the barcode inside the box';
+ reader=new ZXing.BrowserMultiFormatReader(hints(false),200);
+ try{
+  await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}},$('#scan-v'),(res)=>{if(res&&!scanDone){scanDone=true;const code=res.getText();stopScan();gotCode(code)}});
+ }catch(e){stopScan();st(e&&e.name==='NotAllowedError'?'Camera access is off. Turn it on in Settings › Safari › Camera (or for Larder), then try again. You can also type the barcode number.':'Couldn’t start the camera. Try “Use a photo”, or type the barcode number.',true)}
+}
+function stopScan(){try{reader&&reader.reset()}catch(e){}reader=null;const v=$('#scan-v');if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null}$('#scanner').hidden=true}
+async function gotCode(code){
+ code=String(code).replace(/\D/g,'');if(!code)return;
+ $('#f-code').value=code;
+ const k=S.foods[code];
+ if(k){fill({...k,code});st(`Found ${k.name} in your saved products.`);return}
+ await lookupOFF(code);
+}
+async function lookupOFF(code){
+ st(`Looking up ${code}…`);
+ try{
+  const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=product_name,product_name_en,product_name_fr,brands,serving_size,nutriments`);
+  let j=await r.json();
+  if((j.status!==1||!j.product)&&code.length===12){const r2=await fetch(`https://world.openfoodfacts.org/api/v2/product/0${encodeURIComponent(code)}.json?fields=product_name,product_name_en,product_name_fr,brands,serving_size,nutriments`);j=await r2.json()}
+  if(j.status!==1||!j.product){st(`${code} isn’t in the Open Food Facts database yet. ${hasGem()?'Tap “Photo of label” and I’ll read it, or enter':'Enter'} the numbers from the label; it’ll be remembered next time you scan it.`);return}
+  const p=j.product,n=p.nutriments||{},per=n['energy-kcal_serving']!=null||n['proteins_serving']!=null;
+  const v=k=>{const x=n[k+(per?'_serving':'_100g')];return x==null?undefined:num(x)};
+  let kcal=v('energy-kcal');if(kcal===undefined){const kj=v('energy');if(kj!==undefined)kcal=kj/4.184}
+  fill({name:p.product_name_en||p.product_name||p.product_name_fr||'',brand:String(p.brands||'').split(',')[0].trim(),serving:per?(p.serving_size||'1 serving'):'100 g',kcal,p:v('proteins'),c:v('carbohydrates'),f:v('fat'),fib:v('fiber')});
+  st(per?'Found it in Open Food Facts. It’s a community database, so check the numbers against the label.':'Found it in Open Food Facts, but only per 100 g. Change the serving to match the label if you like.');
+ }catch(e){st('Couldn’t reach the food database (are you offline?). Enter the numbers from the label.',true)}
+}
+
+/* ---------- sheet ---------- */
+const SH={dest:'log',invId:null,edit:false};
+const st=(m,err)=>{const s=$('#f-status');s.hidden=!m;s.textContent=m||'';s.classList.toggle('err',!!err)};
+const F=['name','brand','code','serv','kcal','p','c','f','fib'];
+function fill(o){const map={name:o.name,brand:o.brand,code:o.code,serv:o.serving,kcal:o.kcal,p:o.p,c:o.c,f:o.f,fib:o.fib};for(const k of F){const v=map[k];if(v!==null&&v!==undefined&&v!=='')$('#f-'+k).value=typeof v==='number'?g1(v):v}}
+function readFood(){return{name:$('#f-name').value.trim(),brand:$('#f-brand').value.trim(),code:$('#f-code').value.replace(/\D/g,''),serving:$('#f-serv').value.trim(),kcal:num($('#f-kcal').value),p:num($('#f-p').value),c:num($('#f-c').value),f:num($('#f-f').value),fib:num($('#f-fib').value)}}
+function setDest(d){SH.dest=d;$$('[data-a=dest]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===d));$('#d-log').hidden=d!=='log';$('#d-kit').hidden=d!=='kit';$('#pickwrap').hidden=d!=='log'||SH.edit||!S.inv.some(i=>i.qty>0);$('#f-save').textContent=SH.edit?'Save changes':d==='log'?'Log it':'Add to kitchen';$('#sh-t').textContent=SH.edit?'Edit item':d==='log'?'Log food':'Add to kitchen'}
+function openSheet({dest='log',meal,inv}={}){
+ for(const k of F)$('#f-'+k).value='';
+ $('#f-sv').value='1';$('#f-qty').value='1';$('#f-exp').value='';$('#f-desc').value='';$('#descbox').hidden=true;st('');
+ $('#labelbtn').hidden=!hasGem();$('.tools').style.gridTemplateColumns=hasGem()?'':'repeat(2,minmax(0,1fr))';
+ $('#f-meal').value=meal||(S.tab==='today'&&S.day!==TODAY()?'Snacks':mealNow());
+ SH.invId=null;SH.edit=false;$('#takewrap').hidden=true;
+ $('#f-pick').innerHTML='<option value="">Choose an item…</option>'+S.inv.filter(i=>i.qty>0).sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(i=>`<option value="${esc(i.id)}">${esc(i.name)}${i.brand?' · '+esc(i.brand):''}</option>`).join('');
+ if(inv){SH.invId=inv.id;SH.edit=true;fill(inv);$('#f-loc').value=LOCS.includes(inv.loc)?inv.loc:'Pantry';$('#f-qty').value=g1(inv.qty);$('#f-exp').value=inv.exp||''}
+ setDest(inv?'kit':dest);
+ $('#scrim').classList.add('open');document.body.style.overflow='hidden';
+}
+function closeSheet(){$('#scrim').classList.remove('open');document.body.style.overflow=''}
+async function handleLabel(file){
+ st('Reading the label…');
+ try{
+  const img=await scaled(file,1400);URL.revokeObjectURL(img.url);
+  const codeP=$('#f-code').value?Promise.resolve(null):decodePhoto(file);
+  const j=await gemini('You read food packaging photos. From this photo of a Nutrition Facts table (and any packaging visible), return JSON: {"name":product name or null,"brand":brand or null,"serving":"serving size as printed, e.g. 3/4 cup (175 g)","kcal":number,"p":protein g,"c":total carbohydrate g,"f":total fat g,"fib":fibre g}. Values are for ONE serving exactly as printed. Use null for anything you cannot read.',img.blob);
+  fill({name:j.name||undefined,brand:j.brand||undefined,serving:j.serving||undefined,kcal:j.kcal??undefined,p:j.p??undefined,c:j.c??undefined,f:j.f??undefined,fib:j.fib??undefined});
+  const code=await codeP;if(code)$('#f-code').value=code;
+  st('Filled in from the label. Check the numbers, then save'+($('#f-code').value?'; this product will be recognised next time you scan it.':'.'));
+ }catch(e){st(errMsg(e),true)}
+}
+const descPrompt=t=>`Estimate the nutrition of this food as eaten: "${t.replace(/"/g,"'")}". Use typical values from USDA / Canadian Nutrient File data. Return JSON: {"name":short name,"serving":short description of the whole amount described,"kcal":number,"p":protein g,"c":carbs g,"f":fat g,"fib":fibre g} for the WHOLE amount described.`;
+async function estimate(){
+ const t=$('#f-desc').value.trim();if(!t){$('#f-desc').focus();return}
+ if(!hasGem()){openClaude(descPrompt(t)+'\n\nAfter the JSON, add a one-line plain-English summary.');st('Claude will reply with the numbers. Type them into the fields below, then save.');return}
+ st('Estimating…');
+ try{const j=await gemini(descPrompt(t));fill({name:j.name,serving:j.serving,kcal:j.kcal,p:j.p,c:j.c,f:j.f,fib:j.fib});$('#f-sv').value='1';st('This is an estimate. Adjust it if you know better.')}
+ catch(e){st(errMsg(e),true)}
+}
+function saveFood(){
+ const food=readFood();
+ if(!food.name){st('Give it a name first.',true);$('#f-name').focus();return}
+ if(food.code){S.foods[food.code]={...food};save('foods',{map:S.foods})}
+ if(SH.dest==='log'){
+  const d=S.tab==='today'?S.day:TODAY(),undo=snap(d);
+  const sv=Math.max(.05,num($('#f-sv').value)||1),meal=$('#f-meal').value;
+  day(d).push({id:nid(),...food,sv,meal,t:Date.now()});saveDay(d);
+  if(SH.invId&&$('#f-take').checked)dec(SH.invId,sv);
+  toast(`Logged ${food.name} to ${meal}`,undo);
+ }else{
+  const it={...food,loc:$('#f-loc').value,qty:Math.max(0,num($('#f-qty').value)),exp:$('#f-exp').value||''};
+  const ex=SH.edit&&S.inv.find(i=>i.id===SH.invId);
+  if(ex){Object.assign(ex,it);delete ex.sample}else S.inv.push({id:nid(),...it,added:TODAY()});
+  saveInv();toast(ex?'Saved':`Added ${food.name} to ${it.loc}`);
+ }
+ closeSheet();render();
+}
+
+/* ---------- actions ---------- */
+function snap(d){const inv=JSON.stringify(S.inv),lg=JSON.stringify(day(d));return()=>{S.inv=JSON.parse(inv);S.logs[d]=JSON.parse(lg);saveInv();saveDay(d);render();toast('Undone')}}
+function dec(id,n){const it=S.inv.find(i=>i.id===id);if(it){it.qty=Math.max(0,Math.round((it.qty-n)*100)/100);saveInv()}}
+let tt,undoFn=null;
+function toast(m,undo){const t=$('#toast');t.innerHTML=`<span>${esc(m)}</span>${undo?'<button class="btn sm" data-a="undo">Undo</button>':''}`;undoFn=undo||null;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),5500)}
+const tot=L=>L.reduce((s,e)=>{for(const k of ['kcal','p','c','f','fib'])s[k]+=num(e[k])*num(e.sv||1);return s},{kcal:0,p:0,c:0,f:0,fib:0});
+const bar=(v,g)=>{const pct=g?Math.min(100,v/g*100):0;return `<div class="bar"><i class="${g&&v>g?'ov':''}" style="width:${pct.toFixed(1)}%"></i></div>`};
+const svTxt=e=>num(e.sv)===1?(e.serving||'1 serving'):`${g1(e.sv)} × ${e.serving||'serving'}`;
+
+const SAMPLE=[['Large eggs','1 egg (50 g)',72,6.3,.4,4.8,0,'Fridge',12,14],['Plain Greek yogurt, 0%','3/4 cup (175 g)',100,17,6,.7,0,'Fridge',4,5],['Chicken breast','100 g raw',120,22.5,0,2.6,0,'Fridge',6,2],['Baby spinach','2 cups (60 g)',14,1.7,2.2,.2,1.3,'Fridge',3,1],['Cheddar','30 g',120,7,.4,10,0,'Fridge',8,20],['Brown rice','1/4 cup dry (45 g)',165,3.5,34,1.4,1.6,'Pantry',18,0],['Rolled oats','1/2 cup (40 g)',150,5,27,2.5,4,'Pantry',15,0],['Black beans, canned','1/2 cup (130 g)',110,7,20,.5,7,'Pantry',3.5,0],['Frozen mixed berries','1 cup (140 g)',70,1,17,.5,4,'Freezer',5,0]];
+
+function backupText(){const logs={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(K+'log-'))logs[k.slice(K.length+4)]=load(k.slice(K.length),{entries:[]}).entries}return JSON.stringify({app:'larder',v:1,inv:S.inv,foods:S.foods,goals:S.goals,weights:S.weights,logs})}
+
+document.addEventListener('click',e=>{
+ if(e.target.id==='scrim'){closeSheet();return}
+ const b=e.target.closest('[data-a]');if(!b)return;
+ const a=b.dataset.a,id=b.dataset.id,it=id&&S.inv.find(i=>i.id===id);
+ switch(a){
+  case 'prev':S.day=addD(S.day,-1);render();break;
+  case 'next':if(S.day<TODAY()){S.day=addD(S.day,1);render()}break;
+  case 'add':openSheet({dest:'log',meal:b.dataset.meal});break;
+  case 'addkit':openSheet({dest:'kit'});break;
+  case 'scanlog':openSheet({dest:'log'});startScan();break;
+  case 'scankit':openSheet({dest:'kit'});startScan();break;
+  case 'scan':startScan();break;
+  case 'stopscan':stopScan();break;
+  case 'close':closeSheet();break;
+  case 'dest':setDest(b.dataset.d);break;
+  case 'describe':$('#descbox').hidden=false;$('#desc-hint').textContent=hasGem()?'':'This opens your Claude app with the question. Copy the numbers it gives you into the fields below.';$('#f-desc').focus();break;
+  case 'estimate':estimate();break;
+  case 'savefood':saveFood();break;
+  case 'undo':if(undoFn){const f=undoFn;undoFn=null;f()}break;
+  case 'rmlog':{const L=day(S.day),u=snap(S.day),i=L.findIndex(x=>x.id===id);if(i>=0){const [r]=L.splice(i,1);saveDay(S.day);render();toast(`Removed ${r.name}`,u)}break}
+  case 'loc':S.loc=b.dataset.loc;render();break;
+  case 'inc':if(it){it.qty=Math.round((num(it.qty)+1)*100)/100;saveInv();render()}break;
+  case 'dec':if(it){dec(id,1);render()}break;
+  case 'eat':if(it){const d=TODAY(),u=snap(d),meal=mealNow(),sv=Math.min(1,it.qty)||1;day(d).push({id:nid(),name:it.name,brand:it.brand,serving:it.serving,code:it.code,kcal:it.kcal,p:it.p,c:it.c,f:it.f,fib:it.fib,sv,meal,t:Date.now()});saveDay(d);dec(id,sv);render();toast(`Logged ${it.name} to ${meal}`,u)}break;
+  case 'edit':if(it)openSheet({inv:it});break;
+  case 'rminv':if(it){const u=snap(TODAY());S.inv=S.inv.filter(i=>i.id!==id);saveInv();render();toast(`Deleted ${it.name}`,u)}break;
+  case 'sample':SAMPLE.forEach(([name,serving,kcal,p,c,f,fib,loc,qty,ex])=>S.inv.push({id:nid(),name,brand:'',serving,kcal,p,c,f,fib,loc,qty,exp:ex?addD(TODAY(),ex):'',sample:true,added:TODAY()}));saveInv();render();break;
+  case 'clearsample':S.inv=S.inv.filter(i=>!i.sample);saveInv();render();break;
+  case 'askclaude':openClaude(mealPrompt(true));S.showPaste=true;render();break;
+  case 'suggest':suggest();break;
+  case 'useReply':useReply();break;
+  case 'logidea':logIdea(+b.dataset.i);break;
+  case 'split':{const [p,c,f]=b.dataset.s.split(',').map(Number),k=S.goals.kcal;Object.assign(S.goals,{p:Math.round(k*p/400),c:Math.round(k*c/400),f:Math.round(k*f/900)});saveGoals();render();break}
+  case 'unit':S.goals.unit=b.dataset.u;saveGoals();render();break;
+  case 'addw':{const v=num($('#w-in').value);if(v<=0){$('#w-in').focus();break}const kg=S.goals.unit==='lb'?v/LB:v,d=TODAY();S.weights=S.weights.filter(w=>w.d!==d);S.weights.push({d,kg:Math.round(kg*100)/100});S.weights.sort((x,y)=>x.d<y.d?-1:1);saveW();render();toast('Weight saved');break}
+  case 'rmw':S.weights=S.weights.filter(w=>w.d!==b.dataset.d);saveW();render();break;
+  case 'savekey':S.set.gemKey=$('#gem-key').value.trim();S.set.gemModel=$('#gem-model').value.trim()||'gemini-2.5-flash';saveSet();render();toast(S.set.gemKey?'Gemini key saved on this phone':'Gemini key removed');break;
+  case 'sharebk':{const t=backupText(),name=`larder-backup-${TODAY()}.json`;const file=new File([t],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Larder backup'}).catch(()=>{})}else{const a2=document.createElement('a');a2.href=URL.createObjectURL(file);a2.download=name;a2.click();setTimeout(()=>URL.revokeObjectURL(a2.href),4000)}break}
+  case 'restore':$('#in-restore').click();break;
+ }
+});
+document.addEventListener('change',async e=>{
+ const t=e.target;
+ if(t.id==='in-label'&&t.files[0]){const f=t.files[0];t.value='';handleLabel(f)}
+ else if(t.id==='in-scanphoto'&&t.files[0]){const f=t.files[0];t.value='';stopScan();st('Reading the barcode…');const c=await decodePhoto(f);if(c)gotCode(c);else st('I couldn’t find a barcode in that photo. Fill the frame with it, keep it flat and well lit, or type the number.',true)}
+ else if(t.id==='f-code'){const c=t.value.replace(/\D/g,'');if(c&&c.length>=8)gotCode(c)}
+ else if(t.id==='f-pick'){const it=S.inv.find(i=>i.id===t.value);if(it){fill(it);SH.invId=it.id;$('#takewrap').hidden=false}else{SH.invId=null;$('#takewrap').hidden=true}}
+ else if(t.dataset.goal){S.goals[t.dataset.goal]=Math.max(0,Math.round(num(t.value)));saveGoals();render()}
+ else if(t.dataset.m){S.mopt[t.dataset.m]=t.type==='checkbox'?t.checked:t.value}
+ else if(t.id==='in-restore'&&t.files[0]){try{const j=JSON.parse(await t.files[0].text());if(j.app!=='larder')throw 0;if(Array.isArray(j.inv)){S.inv=j.inv;saveInv()}if(j.foods){S.foods=j.foods;save('foods',{map:S.foods})}if(j.goals){S.goals={...S.goals,...j.goals};saveGoals()}if(Array.isArray(j.weights)){S.weights=j.weights;saveW()}if(j.logs)for(const [k,v] of Object.entries(j.logs)){if(/^\d{4}-\d\d-\d\d$/.test(k)&&Array.isArray(v)){S.logs[k]=v;saveDay(k)}}render();toast('Backup restored')}catch(err){toast('That isn’t a Larder backup file')}t.value=''}
+});
+document.addEventListener('input',e=>{if(e.target.id==='kq'){S.q=e.target.value;$('#klist').innerHTML=kitchenList()}else if(e.target.dataset.m==='note')S.mopt.note=e.target.value});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#scanner').hidden)stopScan();else if($('#scrim').classList.contains('open'))closeSheet()}});
+
+/* ---------- meal ideas ---------- */
+function remaining(){const T=tot(day(TODAY())),G=S.goals;return{kcal:Math.max(0,Math.round(G.kcal-T.kcal)),p:Math.max(0,Math.round(G.p-T.p)),c:Math.max(0,Math.round(G.c-T.c)),f:Math.max(0,Math.round(G.f-T.f))}}
+function mealPrompt(forClaude){
+ const o=S.mopt,rem=remaining();
+ const inv=S.inv.filter(i=>i.qty>0).map(i=>({id:i.id,name:i.name+(i.brand?` (${i.brand})`:''),kept_in:i.loc,servings_on_hand:i.qty,serving:i.serving,per_serving:{kcal:i.kcal,p:i.p,c:i.c,f:i.f},expires_in_days:daysTo(i.exp)}));
+ return `You are a practical home cook and nutrition coach helping me lose weight steadily. Suggest 3 clearly different ${o.meal.toLowerCase()} ideas, each recipe making ${o.n} portion(s).
+My kitchen inventory as JSON: ${JSON.stringify(inv)}
+${o.fit?`One portion should fit within what I have left today: ${rem.kcal} kcal, ${rem.p} g protein, ${rem.c} g carbs, ${rem.f} g fat.`:''} Favour high-protein, filling, lower-calorie meals.
+${o.exp?'Use the items with the smallest expires_in_days first.':''}
+${o.strict?'Use only inventory items plus basic staples (oil, salt, pepper, dried herbs and spices, vinegar, water); "buy" must be empty.':'Mostly use inventory items; "buy" may list up to 3 extra ingredients.'}
+${o.note?'My preferences: '+o.note:''}
+${forClaude?'First describe the 3 ideas briefly for me to read. Then, at the very end, give this JSON in one code block so I can paste it into my tracking app:':'Return JSON:'} {"ideas":[{"title":string,"minutes":number,"why":"one sentence on why it suits today","uses":[{"id":"inventory id","name":string,"servings":number of that item's servings used for the WHOLE recipe}],"buy":[string],"steps":["3 to 6 short steps"],"kcal":number,"p":number,"c":number,"f":number,"fib":number}]}. Macros are per ONE portion, worked out from the inventory's per-serving values where possible.`;
+}
+function cleanIdeas(j){return (Array.isArray(j&&j.ideas)?j.ideas:[]).slice(0,5).map(x=>({title:String(x.title||'Idea'),minutes:num(x.minutes),why:String(x.why||''),uses:(Array.isArray(x.uses)?x.uses:[]).map(u=>({id:String(u.id||''),name:String(u.name||''),servings:num(u.servings)})),buy:(Array.isArray(x.buy)?x.buy:[]).map(String),steps:(Array.isArray(x.steps)?x.steps:[]).map(String),kcal:num(x.kcal),p:num(x.p),c:num(x.c),f:num(x.f),fib:num(x.fib)}))}
+async function suggest(){
+ if(S.busy)return;S.busy=true;S.ideaErr='';render();
+ try{S.ideas=cleanIdeas(await gemini(mealPrompt(false)));save('ideas',S.ideas);if(!S.ideas.length)S.ideaErr='No ideas came back. Try again.'}
+ catch(e){S.ideaErr=errMsg(e)}
+ S.busy=false;render();
+}
+function useReply(){
+ const t=$('#reply-in').value;const m=t.search(/\{\s*"ideas"/);
+ try{if(m<0)throw 0;const ideas=cleanIdeas(JSON.parse(t.slice(m,t.lastIndexOf('}')+1)));if(!ideas.length)throw 0;S.ideas=ideas;S.ideaErr='';S.showPaste=false;save('ideas',S.ideas);render();toast('Ideas added')}
+ catch(e){toast('I couldn’t find the ideas code in that. Copy Claude’s whole reply, including the code block at the end.')}
+}
+function logIdea(i){
+ const x=S.ideas&&S.ideas[i];if(!x)return;const d=TODAY(),u=snap(d);
+ day(d).push({id:nid(),name:x.title,serving:'1 portion',kcal:x.kcal,p:x.p,c:x.c,f:x.f,fib:x.fib,sv:1,meal:S.mopt.meal,t:Date.now()});saveDay(d);
+ let n=0;for(const k of x.uses){if(S.inv.some(it=>it.id===k.id)&&k.servings>0){dec(k.id,k.servings);n++}}
+ render();toast(`Logged ${x.title}${n?`, used ${n} item${n>1?'s':''}`:''}`,u);
+}
+
+/* ---------- views ---------- */
+function vToday(){
+ const L=day(S.day),T=tot(L),G=S.goals,left=G.kcal-T.kcal,t=TODAY();
+ const dl=S.day===t?'Today':S.day===addD(t,-1)?'Yesterday':parseD(S.day).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+ return `${!STANDALONE&&!S.hideInstall?`<div class="status" style="margin:0 0 12px">To install: tap Share <b>⎙</b> then <b>Add to Home Screen</b>. Your data stays on this phone.</div>`:''}<section class="label" aria-label="Nutrition for ${esc(dl)}">
+ <h1>Nutrition Facts</h1>
+ <div class="daynav"><button class="ic" data-a="prev" aria-label="Previous day">‹</button><span class="daytxt">${esc(dl)}</span><button class="ic" data-a="next" aria-label="Next day" ${S.day>=t?'disabled':''}>›</button></div>
+ <div class="r10"></div>
+ <div class="calrow"><div><div class="k">Calories ${left<0?'over':'left'}</div><div class="meta">${fmt(T.kcal)} eaten of ${fmt(G.kcal)}</div></div><div class="big ${left<0?'over':''}">${fmt(Math.abs(left))}</div></div>
+ ${bar(T.kcal,G.kcal)}<div class="r5"></div>
+ ${[['Protein','p'],['Carbohydrate','c'],['Fat','f'],['Fibre','fib']].map(([n,k])=>`<div class="mrow"><div class="t"><span><b>${n}</b> ${g1(T[k])} g</span><span class="g">${G[k]?(T[k]>G[k]&&k!=='p'&&k!=='fib'?`${fmt(T[k]-G[k])} g over`:`${fmt(Math.max(0,G[k]-T[k]))} g to go`)+` · goal ${fmt(G[k])}`:''}</span></div>${bar(T[k],G[k])}</div>`).join('')}
+</section>
+<div class="cta"><button class="btn acc" data-a="scanlog">Scan barcode</button><button class="btn pri" data-a="add">Add food</button></div>
+${MEALS.map(m=>{const es=L.filter(e=>e.meal===m),k=es.reduce((s,e)=>s+num(e.kcal)*num(e.sv),0);return `<section class="meal"><div class="mh"><h3>${m}</h3><span class="kc">${es.length?fmt(k)+' cal':''}</span><button class="btn sm ghost" data-a="add" data-meal="${m}" aria-label="Add to ${m}">+ Add</button></div>${es.map(e=>`<div class="entry"><div class="n">${esc(e.name)}<small>${esc(svTxt(e))} · P ${g1(e.p*e.sv)} · C ${g1(e.c*e.sv)} · F ${g1(e.f*e.sv)}</small></div><span class="kc">${fmt(e.kcal*e.sv)}</span><button class="x" data-a="rmlog" data-id="${esc(e.id)}" aria-label="Remove ${esc(e.name)}">×</button></div>`).join('')||'<p class="none">Nothing logged yet</p>'}</section>`}).join('')}`;
+}
+function kitchenList(){
+ if(!S.inv.length)return `<div class="empty"><b>Your kitchen is empty</b>Scan or add what’s in your pantry, fridge and freezer. Meal ideas are built from it.<div class="row"><button class="btn pri" data-a="scankit">Scan an item</button><button class="btn" data-a="sample">Try a sample kitchen</button></div></div>`;
+ const q=S.q.trim().toLowerCase();
+ const xs=S.inv.filter(i=>(S.loc==='All'||(S.loc==='Expiring'?(i.exp&&daysTo(i.exp)<=3):i.loc===S.loc))&&(!q||(i.name+' '+(i.brand||'')).toLowerCase().includes(q)));
+ xs.sort((a,b)=>{const o=(b.qty>0)-(a.qty>0);if(o)return o;const ea=a.exp||'9',eb=b.exp||'9';return ea<eb?-1:ea>eb?1:String(a.name).localeCompare(String(b.name))});
+ const hasS=S.inv.some(i=>i.sample);
+ return (xs.map(i=>{const d=daysTo(i.exp),loc=LOCS.includes(i.loc)?i.loc:'Pantry';const et=d===null?'':d<0?'Expired':d===0?'Use today':d===1?'Tomorrow':d<=7?`${d} days`:parseD(i.exp).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  return `<div class="item"><div><div class="nm">${esc(i.name)}<span class="loc ${loc}">${loc}</span>${i.sample?'<span class="tag">Sample</span>':''}</div><div class="meta">${i.brand?esc(i.brand)+' · ':''}${esc(i.serving||'1 serving')}: ${fmt(i.kcal)} cal · P ${g1(i.p)} · C ${g1(i.c)} · F ${g1(i.f)}</div></div><div class="exp ${d!==null&&d<=3?'soon':''}">${esc(et)}</div>
+  <div class="acts"><span class="stepper"><button data-a="dec" data-id="${esc(i.id)}" aria-label="One fewer ${esc(i.name)}">−</button><span>${i.qty>0?g1(i.qty):'Out'}</span><button data-a="inc" data-id="${esc(i.id)}" aria-label="One more ${esc(i.name)}">+</button></span><button class="btn sm" data-a="eat" data-id="${esc(i.id)}" ${i.qty>0?'':'disabled'}>Eat one</button><button class="btn sm ghost" data-a="edit" data-id="${esc(i.id)}">Edit</button><button class="btn sm ghost" data-a="rminv" data-id="${esc(i.id)}">Delete</button></div></div>`}).join('')||'<p class="none">Nothing matches.</p>')+(hasS?'<p class="meta" style="margin-top:14px">Items tagged Sample are examples. <button class="btn sm ghost" data-a="clearsample">Remove samples</button></p>':'');
+}
+function vKitchen(){
+ const n=l=>l==='All'?S.inv.length:l==='Expiring'?S.inv.filter(i=>i.exp&&daysTo(i.exp)<=3).length:S.inv.filter(i=>i.loc===l).length;
+ return `<h2>Kitchen</h2>
+ <div class="row"><input id="kq" type="search" placeholder="Search your kitchen" value="${esc(S.q)}" aria-label="Search your kitchen"><button class="btn" data-a="scankit">Scan</button><button class="btn pri" data-a="addkit">Add</button></div>
+ <div class="chips" role="group" aria-label="Filter">${['All',...LOCS,'Expiring'].map(l=>`<button class="btn chip" data-a="loc" data-loc="${l}" aria-pressed="${S.loc===l}">${l} <span class="cnt">${n(l)}</span></button>`).join('')}</div>
+ <div id="klist">${kitchenList()}</div>`;
+}
+function vMeals(){
+ const o=S.mopt,rem=remaining(),have=S.inv.filter(i=>i.qty>0).length;
+ const ideas=S.busy?'<div class="skel"></div><div class="skel"></div><div class="skel"></div>':S.ideaErr?`<p class="status err">${esc(S.ideaErr)}</p>`:!S.ideas||!S.ideas.length?(have?'':'<div class="empty"><b>Stock your kitchen first</b>Ideas are built from what you have. <div class="row"><a class="btn pri" href="#kitchen">Go to Kitchen</a></div></div>'):`<h2 style="font-size:26px">Your ideas</h2>`+S.ideas.map((x,i)=>{const owned=x.uses.filter(u=>S.inv.some(it=>it.id===u.id));return `<article class="idea"><div class="ih"><h3>${esc(x.title)}</h3><span class="meta">${x.minutes?fmt(x.minutes)+' min':''}</span></div>
+  ${x.why?`<p>${esc(x.why)}</p>`:''}
+  <div class="macros"><span><b>${fmt(x.kcal)}</b> cal</span><span>Protein <b>${g1(x.p)}</b> g</span><span>Carbs <b>${g1(x.c)}</b> g</span><span>Fat <b>${g1(x.f)}</b> g</span></div><p class="meta">Per portion, estimated</p>
+  ${owned.length?`<h4>From your kitchen</h4><ul>${owned.map(u=>`<li>${esc(u.name)}: ${g1(u.servings)} serving${u.servings==1?'':'s'}</li>`).join('')}</ul>`:''}
+  ${x.buy.length?`<h4>You’d also need</h4><ul>${x.buy.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>`:''}
+  ${x.steps.length?`<details><summary>How to make it</summary><ol>${x.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></details>`:''}
+  <button class="btn pri wide" data-a="logidea" data-i="${i}">I made it: log 1 portion</button><p class="meta">Takes the ingredients above out of your kitchen. You can undo.</p></article>`}).join('');
+ return `<h2>Meal ideas</h2>
+ <p>Built from what’s in your kitchen${have?` (${have} item${have>1?'s':''} on hand)`:''}.</p>
+ <div class="panel">
+  <div class="grid2" style="margin-top:0"><label class="f"><span>Meal</span><select data-m="meal">${MEALS.map(m=>`<option ${o.meal===m?'selected':''}>${m}</option>`).join('')}</select></label><label class="f"><span>Portions to cook</span><select data-m="n">${['1','2','4'].map(n=>`<option ${o.n===n?'selected':''}>${n}</option>`).join('')}</select></label></div>
+  <label class="chk"><input type="checkbox" data-m="fit" ${o.fit?'checked':''}> Fit what’s left today: ${fmt(rem.kcal)} cal, ${fmt(rem.p)} g protein</label>
+  <label class="chk"><input type="checkbox" data-m="exp" ${o.exp?'checked':''}> Use what expires soonest first</label>
+  <label class="chk"><input type="checkbox" data-m="strict" ${o.strict?'checked':''}> Only what I have (plus oil and spices)</label>
+  <label class="f"><span>Anything else?</span><input data-m="note" value="${esc(o.note)}" placeholder="Vegetarian, 20 minutes max, no cilantro…"></label>
+  <div class="ai-src">
+   <button class="btn acc" data-a="askclaude">Ask Claude for ideas</button>
+   ${hasGem()?`<button class="btn" data-a="suggest" ${S.busy?'disabled':''}>${S.busy?'Thinking…':'Suggest here with Gemini'}</button>`:''}
+  </div>
+  <p class="meta">“Ask Claude” opens your Claude app with your kitchen and macros filled in. It uses your Claude account, so there’s nothing extra to pay.</p>
+  <details class="reply" ${S.showPaste?'open':''}><summary>Paste Claude’s reply to log meals here</summary>
+   <p class="meta">In Claude, copy the whole reply (or just the code block at the end) and paste it below. Then you can log a meal and take its ingredients out of your kitchen.</p>
+   <textarea id="reply-in" rows="4" aria-label="Claude’s reply"></textarea><button class="btn pri wide" data-a="useReply" style="margin-top:8px">Add these ideas</button></details>
+ </div>${ideas}`;
+}
+let ro=null;
+function vProgress(){
+ const G=S.goals,t=TODAY(),days=[...Array(7)].map((_,i)=>addD(t,i-6));
+ const vals=days.map(d=>tot(day(d)).kcal),logged=vals.filter(v=>v);const max=Math.max(G.kcal,...vals)*1.05||1;
+ const u=G.unit==='lb'?'lb':'kg',m=u==='lb'?LB:1,ws=S.weights;
+ const ch=ws.length>1?(ws[ws.length-1].kg-ws[0].kg)*m:null;
+ return `<h2>Goals</h2><div class="panel">
+  <div class="g5" style="margin-top:0">${[['kcal','Calories'],['p','Protein g'],['c','Carbs g'],['f','Fat g'],['fib','Fibre g']].map(([k,l])=>`<label class="f"><span>${l}</span><input type="number" inputmode="numeric" min="0" data-goal="${k}" value="${esc(G[k])}"></label>`).join('')}</div>
+  <div class="presets"><span>Split ${fmt(G.kcal)} cal:</span><button class="btn sm" data-a="split" data-s="30,40,30">Balanced</button><button class="btn sm" data-a="split" data-s="40,30,30">High protein</button><button class="btn sm" data-a="split" data-s="35,25,40">Lower carb</button></div>
+  <p class="meta" style="margin-top:10px">Eating about 500 calories under maintenance usually means roughly 0.5 kg (1 lb) lost a week. A doctor or dietitian can set targets that fit you.</p></div>
+ <h2>Last 7 days</h2><div class="panel">${days.map((d,i)=>`<div class="wk"><span>${parseD(d).toLocaleDateString(undefined,{weekday:'short'})}</span><div class="bar"><i class="${vals[i]>G.kcal?'ov':''}" style="width:${vals[i]?(vals[i]/max*100).toFixed(1):0}%"></i></div><span class="v">${vals[i]?fmt(vals[i]):'–'}</span></div>`).join('')}
+  <p class="meta">${logged.length?`Average ${fmt(logged.reduce((a,b)=>a+b,0)/logged.length)} cal on ${logged.length} logged day${logged.length>1?'s':''} · goal ${fmt(G.kcal)}`:'Log food to see your week.'}</p></div>
+ <h2>Weight</h2><div class="panel">
+  <div class="row"><input id="w-in" type="number" inputmode="decimal" step="0.1" min="0" placeholder="Today’s weight" aria-label="Today’s weight"><span class="seg"><button data-a="unit" data-u="kg" aria-pressed="${u==='kg'}">kg</button><button data-a="unit" data-u="lb" aria-pressed="${u==='lb'}">lb</button></span><button class="btn pri" data-a="addw">Save</button></div>
+  ${ch!==null?`<p style="margin-top:12px"><b class="${ch>0?'over':''}">${ch>0?'+':ch<0?'−':''}${g1(Math.abs(ch))} ${u}</b> since ${parseD(ws[0].d).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</p>`:''}
+  <div class="fig" id="wfig"><svg id="wsvg" role="img" aria-label="Weight trend"></svg></div>
+  ${ws.slice(-5).reverse().map(w=>`<div class="wl"><span>${parseD(w.d).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}</span><span><b>${g1(w.kg*m)}</b> ${u}<button class="x" data-a="rmw" data-d="${esc(w.d)}" aria-label="Delete">×</button></span></div>`).join('')}</div>
+ <h2>Meal ideas helper</h2><div class="panel">
+  <p>Meal ideas use your <b>Claude app</b> by default, at no extra cost.</p>
+  <p class="meta">Optional: a free Google Gemini key lets Larder suggest meals, read nutrition-label photos and estimate foods right inside the app. Get one at aistudio.google.com → Get API key. On the free tier, Google may use what you send to improve its products. Your key is stored only on this phone.</p>
+  <div class="grid2"><label class="f span2"><span>Gemini API key</span><input id="gem-key" type="password" autocomplete="off" value="${esc(S.set.gemKey)}" placeholder="Paste your key"></label><label class="f span2"><span>Model</span><input id="gem-model" autocomplete="off" value="${esc(S.set.gemModel)}"></label></div>
+  <button class="btn pri wide" data-a="savekey">Save</button></div>
+ <h2>Your data</h2><div class="panel"><p class="meta">Everything is saved on this phone only. Back up now and then, for example to iCloud Drive, so you don’t lose it if you delete the app or change phones.</p>
+  <div class="row" style="margin-top:8px"><button class="btn" data-a="sharebk">Back up</button><button class="btn ghost" data-a="restore">Restore a backup</button><input type="file" accept="application/json,.json" class="vh" id="in-restore"></div></div>`;
+}
+function drawW(){
+ const s=$('#wsvg');if(!s)return;const W=s.clientWidth,H=s.clientHeight;if(!W)return;
+ const m=S.goals.unit==='lb'?LB:1,pts=S.weights.slice(-90);
+ if(pts.length<2){s.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="currentColor" opacity=".55" font-size="14">Log two weigh-ins to see your trend</text>`;return}
+ const t0=parseD(pts[0].d).getTime(),t1=parseD(pts[pts.length-1].d).getTime()||t0+1,v=pts.map(p=>p.kg*m),lo=Math.min(...v),hi=Math.max(...v),pad=Math.max(.5,(hi-lo)*.15);
+ const L=W<520?8:40,R=W-12,T=12,B=H-24,x=p=>L+(parseD(p.d).getTime()-t0)/Math.max(1,t1-t0)*(R-L),y=val=>B-(val-(lo-pad))/((hi+pad)-(lo-pad))*(B-T);
+ const d=pts.map((p,i)=>`${i?'L':'M'}${x(p).toFixed(1)},${y(v[i]).toFixed(1)}`).join('');
+ const ticks=W<520?'':[lo,(lo+hi)/2,hi].map(tv=>`<text x="${L-8}" y="${y(tv)+4}" text-anchor="end" font-size="12" fill="currentColor" opacity=".6">${g1(tv)}</text><line x1="${L}" x2="${R}" y1="${y(tv)}" y2="${y(tv)}" stroke="currentColor" opacity=".12"/>`).join('');
+ const lp=pts[pts.length-1],lx=x(lp),ly=y(v[v.length-1]);
+ s.innerHTML=`${ticks}<path d="${d}" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${pts.map((p,i)=>`<circle cx="${x(p).toFixed(1)}" cy="${y(v[i]).toFixed(1)}" r="3" fill="var(--bg)" stroke="var(--ink)" stroke-width="2"/>`).join('')}<circle cx="${lx}" cy="${ly}" r="6" fill="var(--acc)"/><text x="${L}" y="${H-4}" font-size="12" fill="currentColor" opacity=".6">${esc(parseD(pts[0].d).toLocaleDateString(undefined,{month:'short',day:'numeric'}))}</text><text x="${R}" y="${H-4}" font-size="12" text-anchor="end" fill="currentColor" opacity=".6">${esc(parseD(lp.d).toLocaleDateString(undefined,{month:'short',day:'numeric'}))}</text>`;
+}
+
+function render(){
+ $$('.tabs a').forEach(a=>a.dataset.t===S.tab?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
+ $('#sync').textContent='Saved on this phone';
+ if(ro){ro.disconnect();ro=null}
+ const y=window.scrollY;
+ $('#view').innerHTML=({today:vToday,kitchen:vKitchen,meals:vMeals,progress:vProgress})[S.tab]();
+ window.scrollTo(0,y);
+ if(S.tab==='progress'){const f=$('#wfig');if(f){ro=new ResizeObserver(drawW);ro.observe(f)}}
+}
+function route(){const h=location.hash.slice(1);const nt=['today','kitchen','meals','progress'].includes(h)?h:'today';if(nt!==S.tab)window.scrollTo(0,0);S.tab=nt;render()}
+window.addEventListener('hashchange',route);
+// a new day while the app sits open in the background
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){const t=TODAY();if(S.lastDay&&S.lastDay!==t&&S.day===S.lastDay)S.day=t;S.lastDay=t;render()}else stopScan()});
+
+const inv=load('inv',{items:[]}),foods=load('foods',{map:{}}),goals=load('goals',null),w=load('weights',{list:[]}),set=load('settings',null),ideas=load('ideas',null);
+S.inv=Array.isArray(inv.items)?inv.items:[];S.foods=foods.map&&typeof foods.map==='object'?foods.map:{};
+if(goals&&typeof goals==='object')S.goals={...S.goals,...goals};if(set&&typeof set==='object')S.set={...S.set,...set};
+S.weights=Array.isArray(w.list)?w.list:[];if(Array.isArray(ideas))S.ideas=ideas;S.lastDay=TODAY();
+route();
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body></html>
